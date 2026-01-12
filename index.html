@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Financiero 2026</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Variables Dinámicas (Se cambian con JS) */
+            --primary: #1e3a29;      /* Inicia en Verde */
+            --primary-light: #3d7a5b;
+            
+            /* Constantes */
+            --accent: #b45309;
+            --bg-body: #f3f4f6;
+            --bg-card: #ffffff;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --border: #e5e7eb;
+            --success: #059669;
+            --danger: #dc2626;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            padding: 2rem 1rem;
+            min-height: 100vh;
+            transition: background-color 0.3s ease;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        /* --- NAVEGACIÓN (TABS) --- */
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            background: white;
+            padding: 0.5rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 1rem;
+            border: none;
+            background: transparent;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active {
+            background-color: var(--primary);
+            color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .tab-content {
+            display: none; /* Oculto por defecto */
+            animation: fadeIn 0.4s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- ESTILOS COMUNES --- */
+        header { text-align: center; margin-bottom: 2rem; }
+        h1 { color: var(--primary); font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem; transition: color 0.3s; }
+        .subtitle { color: var(--text-muted); font-size: 1rem; }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            border-left: 5px solid transparent;
+        }
+        
+        /* Bordes de tarjetas */
+        .stat-card.c-pagadas { border-left-color: var(--success); }
+        .stat-card.c-pendientes { border-left-color: var(--text-muted); }
+        .stat-card.c-total { border-left-color: var(--primary); }
+        .stat-card.c-saldo { border-left-color: var(--accent); }
+
+        .stat-label { font-size: 0.85rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.5rem; font-weight: 600; }
+        .stat-value { font-size: 2rem; font-weight: 700; color: var(--text-main); }
+
+        .progress-section, .payment-panel, .table-container {
+            background: var(--bg-card);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+        }
+
+        .progress-header { display: flex; justify-content: space-between; margin-bottom: 0.75rem; font-weight: 600; }
+        .progress-track { width: 100%; height: 12px; background: #e2e8f0; border-radius: 999px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--primary); border-radius: 999px; transition: width 0.6s ease; }
+
+        .input-group { display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1rem; }
+        input[type="number"] {
+            flex: 1; min-width: 200px; padding: 0.75rem 1rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 1rem;
+        }
+        input[type="number"]:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0,0,0, 0.1); }
+
+        button { padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s; border: none; font-size: 0.95rem; }
+        .btn-primary { background-color: var(--primary); color: white; transition: background-color 0.3s; }
+        .btn-primary:hover { opacity: 0.9; }
+        .btn-outline { background: transparent; border: 1px solid #cbd5e1; color: var(--text-muted); }
+        .btn-outline:hover { border-color: var(--danger); color: var(--danger); background: #fef2f2; }
+
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th { background: #f1f5f9; padding: 1rem; font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; }
+        td { padding: 1rem; border-bottom: 1px solid var(--border); font-size: 0.95rem; }
+        .row-pagado { background-color: rgba(5, 150, 105, 0.05); } /* Verde muy suave genérico */
+        
+        .badge { display: inline-flex; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 700; }
+        .badge-success { background-color: #dcfce7; color: #15803d; }
+        .badge-pending { background-color: #f1f5f9; color: #64748b; }
+        
+        tfoot td { background: #f8fafc; font-weight: 700; color: var(--primary); font-size: 1.1rem; }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .nav-tabs { flex-direction: column; gap: 0.5rem; }
+            .input-group { flex-direction: column; }
+            button { width: 100%; }
+        }
+    </style>
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#1e3a8a">
+    <link rel="apple-touch-icon" href="./images/icon-192.png">
+</head>
+<body>
+    <div class="container">
+        <nav class="nav-tabs">
+            <button class="tab-btn active" onclick="switchTab('semanal')">Canasta Semanal </button>
+            <button class="tab-btn" onclick="switchTab('mensual')">Canasta Mensual </button>
+        </nav>
+
+        <div id="view-semanal" class="tab-content active">
+            <header>
+                <h1>🎄 Control Semanal 2026</h1>
+                <p class="subtitle">Ahorro de S/ 10 x 50 Semanas | Meta: S/ 500.00</p>
+            </header>
+
+            <div class="stats-grid">
+                <div class="stat-card c-pagadas">
+                    <div class="stat-label">Semanas Pagadas</div>
+                    <div class="stat-value" id="s-semanas-pagadas">0</div>
+                </div>
+                <div class="stat-card c-pendientes">
+                    <div class="stat-label">Pendientes</div>
+                    <div class="stat-value" id="s-semanas-pendientes">50</div>
+                </div>
+                <div class="stat-card c-total">
+                    <div class="stat-label">Total Ahorrado</div>
+                    <div class="stat-value" id="s-total-pagado">S/ 0</div>
+                </div>
+                <div class="stat-card c-saldo">
+                    <div class="stat-label">Saldo Restante</div>
+                    <div class="stat-value" id="s-saldo-restante">S/ 500</div>
+                </div>
+            </div>
+
+            <div class="progress-section">
+                <div class="progress-header">
+                    <span>Progreso Semanal</span>
+                    <span id="s-progreso-porcentaje">0%</span>
+                </div>
+                <div class="progress-track">
+                    <div class="progress-fill" id="s-progress-fill" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div class="payment-panel">
+                <h2 style="font-size: 1.25rem; margin-bottom: 0.5rem; color: var(--primary);">Registrar Pago Semanal</h2>
+                <p style="color: var(--text-muted); font-size: 0.9rem;">Múltiplos de S/ 10 (Ej: 20 soles = 2 semanas)</p>
+                <div class="input-group">
+                    <input type="number" id="s-monto-pago" placeholder="Monto (S/)" min="0" step="10">
+                    <button class="btn-primary" onclick="agregarPagoSemanal()">Registrar Abono</button>
+                    <button class="btn-outline" onclick="reiniciarSemanal()">Reiniciar</button>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <div style="overflow-x: auto;">
+                    <table id="tabla-semanas">
+                        <thead>
+                            <tr>
+                                <th>Semana</th>
+                                <th>Vencimiento</th>
+                                <th style="text-align: center;">Estado</th>
+                                <th style="text-align: right;">Monto</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-semanas"></tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="3" style="text-align: right;">TOTAL:</td>
+                                <td style="text-align: right;" id="s-total-footer">S/ 0.00</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-mensual" class="tab-content">
+            <header>
+                <h1>💰 Control Mensual 2026</h1>
+                <p class="subtitle">Ahorro de S/ 50 x 11 Meses | Meta: S/ 550.00</p>
+            </header>
+
+            <div class="stats-grid">
+                <div class="stat-card c-pagadas">
+                    <div class="stat-label">Meses Cubiertos</div>
+                    <div class="stat-value" id="m-meses-pagados">0</div>
+                </div>
+                <div class="stat-card c-pendientes">
+                    <div class="stat-label">Restantes</div>
+                    <div class="stat-value" id="m-meses-pendientes">11</div>
+                </div>
+                <div class="stat-card c-total">
+                    <div class="stat-label">Total Acumulado</div>
+                    <div class="stat-value" id="m-total-pagado">S/ 0</div>
+                </div>
+                <div class="stat-card c-saldo">
+                    <div class="stat-label">Saldo por Pagar</div>
+                    <div class="stat-value" id="m-saldo-restante">S/ 550</div>
+                </div>
+            </div>
+
+            <div class="progress-section">
+                <div class="progress-header">
+                    <span>Progreso Anual</span>
+                    <span id="m-progreso-porcentaje">0%</span>
+                </div>
+                <div class="progress-track">
+                    <div class="progress-fill" id="m-progress-fill" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div class="payment-panel">
+                <h2 style="font-size: 1.25rem; margin-bottom: 0.5rem; color: var(--primary);">Registrar Pago Mensual</h2>
+                <p style="color: var(--text-muted); font-size: 0.9rem;">Múltiplos de S/ 50 (Ej: 100 soles = 2 meses)</p>
+                <div class="input-group">
+                    <input type="number" id="m-monto-pago" placeholder="Monto (S/)" min="0" step="50">
+                    <button class="btn-primary" onclick="agregarPagoMensual()">Registrar Pago</button>
+                    <button class="btn-outline" onclick="reiniciarMensual()">Reiniciar</button>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <div style="overflow-x: auto;">
+                    <table id="tabla-meses">
+                        <thead>
+                            <tr>
+                                <th>Periodo</th>
+                                <th>Mes</th>
+                                <th style="text-align: center;">Estado</th>
+                                <th style="text-align: right;">Monto</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-meses"></tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="3" style="text-align: right;">TOTAL:</td>
+                                <td style="text-align: right;" id="m-total-footer">S/ 0.00</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // LÓGICA DE PESTAÑAS (UI)
+        // ==========================================
+        function switchTab(tabName) {
+            // 1. Ocultar todos los contenidos
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+
+            // 2. Mostrar el seleccionado
+            document.getElementById(`view-${tabName}`).classList.add('active');
+            
+            // 3. Activar botón
+            const btnIndex = tabName === 'semanal' ? 0 : 1;
+            document.querySelectorAll('.tab-btn')[btnIndex].classList.add('active');
+
+            // 4. CAMBIAR TEMA DE COLOR (CSS VARIABLES)
+            const root = document.documentElement;
+            if (tabName === 'semanal') {
+                root.style.setProperty('--primary', '#1e3a29'); // Verde Bosque
+                root.style.setProperty('--primary-light', '#3d7a5b');
+                document.body.style.backgroundColor = '#f3f4f6'; // Gris neutro
+            } else {
+                root.style.setProperty('--primary', '#1e3a8a'); // Azul Marino
+                root.style.setProperty('--primary-light', '#2563eb');
+                document.body.style.backgroundColor = '#f8fafc'; // Azulado muy claro
+            }
+        }
+
+        // ==========================================
+        // LÓGICA SEMANAL (PREFIJO 's-')
+        // ==========================================
+        const S_COSTO = 10;
+        const S_TOTAL = 50;
+        const S_FECHA_INICIO = new Date(2026, 0, 11);
+        const S_KEY = 'canasta-navidena-data-2026';
+        let s_data = [];
+
+        function initSemanal() {
+            const arr = [];
+            for (let i = 0; i < S_TOTAL; i++) {
+                const fecha = new Date(S_FECHA_INICIO);
+                fecha.setDate(S_FECHA_INICIO.getDate() + (i * 7));
+                arr.push({
+                    numero: i + 1,
+                    fecha: fecha.toLocaleDateString('es-PE', { day: '2-digit', month: 'long' }),
+                    pagado: false, monto: 0
+                });
+            }
+            return arr;
+        }
+
+        function cargarSemanal() {
+            try { return JSON.parse(localStorage.getItem(S_KEY)) || initSemanal(); } 
+            catch { return initSemanal(); }
+        }
+
+        function renderSemanal() {
+            const tbody = document.getElementById('tbody-semanas');
+            tbody.innerHTML = '';
+            s_data.forEach(s => {
+                const tr = document.createElement('tr');
+                if (s.pagado) tr.classList.add('row-pagado');
+                tr.innerHTML = `
+                    <td>Semana ${s.numero}</td>
+                    <td style="color:var(--text-muted)">${s.fecha}</td>
+                    <td style="text-align:center"><span class="badge ${s.pagado?'badge-success':'badge-pending'}">${s.pagado?'Pagado':'Pendiente'}</span></td>
+                    <td style="text-align:right">S/ ${s.pagado? s.monto.toFixed(2):'-'}</td>`;
+                tbody.appendChild(tr);
+            });
+            updateStatsSemanal();
+        }
+
+        function updateStatsSemanal() {
+            const pagadas = s_data.filter(s => s.pagado).length;
+            const total = pagadas * S_COSTO;
+            const progreso = (pagadas / S_TOTAL) * 100;
+            
+            document.getElementById('s-semanas-pagadas').textContent = pagadas;
+            document.getElementById('s-semanas-pendientes').textContent = S_TOTAL - pagadas;
+            document.getElementById('s-total-pagado').textContent = `S/ ${total}`;
+            document.getElementById('s-saldo-restante').textContent = `S/ ${(S_TOTAL * S_COSTO) - total}`;
+            document.getElementById('s-progreso-porcentaje').textContent = `${progreso.toFixed(0)}%`;
+            document.getElementById('s-progress-fill').style.width = `${progreso}%`;
+            document.getElementById('s-total-footer').textContent = `S/ ${total.toFixed(2)}`;
+        }
+
+        function agregarPagoSemanal() {
+            const input = document.getElementById('s-monto-pago');
+            const monto = parseFloat(input.value);
+            if (isNaN(monto) || monto <= 0) return alert('Monto inválido');
+            
+            const count = Math.floor(monto / S_COSTO);
+            if (count === 0) return alert('Mínimo S/ 10');
+
+            let added = 0;
+            for(let item of s_data) {
+                if(!item.pagado && added < count) {
+                    item.pagado = true; item.monto = S_COSTO; added++;
+                }
+            }
+            if(added === 0 && monto > 0) alert('Ya completaste todo.');
+            
+            localStorage.setItem(S_KEY, JSON.stringify(s_data));
+            renderSemanal();
+            input.value = '';
+        }
+
+        function reiniciarSemanal() {
+            if(confirm('¿Borrar todo el progreso semanal?')) {
+                s_data = initSemanal();
+                localStorage.setItem(S_KEY, JSON.stringify(s_data));
+                renderSemanal();
+            }
+        }
+
+        // ==========================================
+        // LÓGICA MENSUAL (PREFIJO 'm-')
+        // ==========================================
+        const M_COSTO = 50;
+        const M_TOTAL = 11;
+        const M_FECHA_INICIO = new Date(2026, 0, 1);
+        const M_KEY = 'ahorro-mensual-data-2026';
+        const MESES_TXT = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+        let m_data = [];
+
+        function initMensual() {
+            const arr = [];
+            for (let i = 0; i < M_TOTAL; i++) {
+                const f = new Date(M_FECHA_INICIO);
+                f.setMonth(M_FECHA_INICIO.getMonth() + i);
+                arr.push({
+                    numero: i + 1,
+                    nombre: MESES_TXT[f.getMonth()],
+                    anio: f.getFullYear(),
+                    pagado: false, monto: 0
+                });
+            }
+            return arr;
+        }
+
+        function cargarMensual() {
+            try { return JSON.parse(localStorage.getItem(M_KEY)) || initMensual(); } 
+            catch { return initMensual(); }
+        }
+
+        function renderMensual() {
+            const tbody = document.getElementById('tbody-meses');
+            tbody.innerHTML = '';
+            m_data.forEach(m => {
+                const tr = document.createElement('tr');
+                if (m.pagado) tr.classList.add('row-pagado');
+                tr.innerHTML = `
+                    <td>Mes ${m.numero}</td>
+                    <td style="color:var(--text-muted)">📅 ${m.nombre} ${m.anio}</td>
+                    <td style="text-align:center"><span class="badge ${m.pagado?'badge-success':'badge-pending'}">${m.pagado?'Pagado':'Pendiente'}</span></td>
+                    <td style="text-align:right">S/ ${m.pagado? m.monto.toFixed(2):'-'}</td>`;
+                tbody.appendChild(tr);
+            });
+            updateStatsMensual();
+        }
+
+        function updateStatsMensual() {
+            const pagados = m_data.filter(m => m.pagado).length;
+            const total = pagados * M_COSTO;
+            const progreso = (pagados / M_TOTAL) * 100;
+            
+            document.getElementById('m-meses-pagados').textContent = pagados;
+            document.getElementById('m-meses-pendientes').textContent = M_TOTAL - pagados;
+            document.getElementById('m-total-pagado').textContent = `S/ ${total}`;
+            document.getElementById('m-saldo-restante').textContent = `S/ ${(M_TOTAL * M_COSTO) - total}`;
+            document.getElementById('m-progreso-porcentaje').textContent = `${progreso.toFixed(0)}%`;
+            document.getElementById('m-progress-fill').style.width = `${progreso}%`;
+            document.getElementById('m-total-footer').textContent = `S/ ${total.toFixed(2)}`;
+        }
+
+        function agregarPagoMensual() {
+            const input = document.getElementById('m-monto-pago');
+            const monto = parseFloat(input.value);
+            if (isNaN(monto) || monto <= 0) return alert('Monto inválido');
+            
+            const count = Math.floor(monto / M_COSTO);
+            if (count === 0) return alert('Mínimo S/ 50');
+
+            let added = 0;
+            for(let item of m_data) {
+                if(!item.pagado && added < count) {
+                    item.pagado = true; item.monto = M_COSTO; added++;
+                }
+            }
+            if(added === 0 && monto > 0) alert('Ya completaste todo.');
+            
+            localStorage.setItem(M_KEY, JSON.stringify(m_data));
+            renderMensual();
+            input.value = '';
+        }
+
+        function reiniciarMensual() {
+            if(confirm('¿Borrar todo el progreso mensual?')) {
+                m_data = initMensual();
+                localStorage.setItem(M_KEY, JSON.stringify(m_data));
+                renderMensual();
+            }
+        }
+
+        // ==========================================
+        // INICIALIZACIÓN FINAL
+        // ==========================================
+        document.addEventListener('DOMContentLoaded', () => {
+            // Cargar datos
+            s_data = cargarSemanal();
+            m_data = cargarMensual();
+
+            // Render inicial
+            renderSemanal();
+            renderMensual();
+
+            // Listeners para Enter
+            document.getElementById('s-monto-pago').addEventListener('keypress', (e) => {
+                if(e.key === 'Enter') agregarPagoSemanal();
+            });
+            document.getElementById('m-monto-pago').addEventListener('keypress', (e) => {
+                if(e.key === 'Enter') agregarPagoMensual();
+            });
+
+            // Iniciar en tab semanal
+            switchTab('semanal');
+        });
+        if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js')
+                .then(reg => console.log('SW registrado exitosamente!', reg.scope))
+                .catch(err => console.log('Fallo al registrar SW:', err));
+        });
+    }
+    </script>
+</body>
+</html>
